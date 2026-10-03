@@ -1,0 +1,6 @@
+[
+  {"provider": "gcp", "service": "BigQuery", "cost": 120.5, "currency": "USD"},
+  {"provider": "gcp", "service": "Cloud Storage", "cost": 18.0, "currency": "USD"},
+  {"provider": "aws", "service": "EC2", "cost": 80.25, "currency": "USD"},
+  {"provider": "aws", "service": "S3", "cost": 12.4, "currency": "USD"}
+]
