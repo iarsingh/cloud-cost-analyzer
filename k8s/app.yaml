@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-cost-analyzer
+  labels:
+    app: cloud-cost-analyzer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloud-cost-analyzer
+  template:
+    metadata:
+      labels:
+        app: cloud-cost-analyzer
+    spec:
+      containers:
+        - name: api
+          image: cloud-cost-analyzer:local
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /v1/readyz
+              port: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloud-cost-analyzer
+spec:
+  selector:
+    app: cloud-cost-analyzer
+  ports:
+    - port: 80
+      targetPort: 8080

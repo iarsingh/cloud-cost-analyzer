@@ -1,3 +1,4 @@
+from costs.ops import router as ops_router
 import json
 from pathlib import Path
 
@@ -7,6 +8,7 @@ from pydantic import BaseModel, Field
 from costs.analyze import CostError, parse_csv, summarize
 
 app = FastAPI(title="Cloud cost analyzer")
+app.include_router(ops_router, prefix="/v1")
 SAMPLE = Path(__file__).resolve().parents[2] / "data" / "sample-costs.json"
 
 
