@@ -13,11 +13,13 @@ I would demonstrate the linked implementation or examples and distinguish that e
 ## 2. How is this repository organized?
 
 - [`src/costs/main.py`](src/costs/main.py): Implementation or supporting configuration.
+- [`src/costs/ops.py`](src/costs/ops.py): Implementation or supporting configuration.
 - [`src/costs/analyze.py`](src/costs/analyze.py): Implementation or supporting configuration.
 - [`requirements.txt`](requirements.txt): Implementation or supporting configuration.
+- [`Dockerfile`](Dockerfile): Container build/service configuration.
+- [`Makefile`](Makefile): Implementation or supporting configuration.
+- [`docker-compose.yml`](docker-compose.yml): Container build/service configuration.
 - [`tests/test_costs.py`](tests/test_costs.py): Executable checks and regression examples.
-- [`.github/workflows/ci.yml`](.github/workflows/ci.yml): GitHub Actions job definitions.
-- [`README.md`](README.md): Project explanations or operating notes.
 
 [PROJECT_ARCHITECTURE.md](PROJECT_ARCHITECTURE.md) contains the component diagram and the implementation walkthrough.
 
@@ -72,7 +74,7 @@ Explicit failure paths include:
 - `CostError(f'mixed currencies {sorted(currencies)}; convert before summing')` in [`src/costs/analyze.py`](src/costs/analyze.py#L62).
 - `CostError(f'row is missing {key}')` in [`src/costs/analyze.py`](src/costs/analyze.py#L19).
 - `CostError(f"cost is not a number: {row['cost']}")` in [`src/costs/analyze.py`](src/costs/analyze.py#L25).
-- `HTTPException(status_code=422, detail='provider must be gcp, aws, or all')` in [`src/costs/main.py`](src/costs/main.py#L31).
+- `HTTPException(status_code=422, detail='provider must be gcp, aws, or all')` in [`src/costs/main.py`](src/costs/main.py#L33).
 
 I would test both the condition that reaches each exception and the caller that translates it. An explicit raise does not mean every malformed input or dependency failure is handled.
 
@@ -91,15 +93,20 @@ This is a concrete regression example from the repository. Its assertions establ
 
 ## 7. What HTTP interface does the code expose?
 
-- `GET /healthz` → `healthz` in [`src/costs/main.py`](src/costs/main.py#L36).
-- `POST /costs/summary` → `summary` in [`src/costs/main.py`](src/costs/main.py#L41).
-- `POST /costs/csv` → `summary_from_csv` in [`src/costs/main.py`](src/costs/main.py#L52).
+- `GET /healthz` → `healthz` in [`src/costs/main.py`](src/costs/main.py#L38).
+- `POST /costs/summary` → `summary` in [`src/costs/main.py`](src/costs/main.py#L43).
+- `POST /costs/csv` → `summary_from_csv` in [`src/costs/main.py`](src/costs/main.py#L54).
+- `GET /readyz` → `readyz` in [`src/costs/ops.py`](src/costs/ops.py#L44).
+- `POST /workspaces` → `create_workspace` in [`src/costs/ops.py`](src/costs/ops.py#L49).
+- `GET /workspaces` → `list_workspaces` in [`src/costs/ops.py`](src/costs/ops.py#L66).
+- `POST /workspaces/{workspace_id}/jobs` → `create_job` in [`src/costs/ops.py`](src/costs/ops.py#L73).
+- `GET /jobs/{job_id}` → `get_job` in [`src/costs/ops.py`](src/costs/ops.py#L96).
 
 These are literal decorators. Application/router prefixes, authentication, and middleware must be checked in the corresponding setup code.
 
 ## 8. Where does state live, and what happens with multiple workers?
 
-Module-level containers include `PROVIDERS`, `CSV_COLUMNS` in [`src/costs/analyze.py`](src/costs/analyze.py).
+Module-level containers include `PROVIDERS`, `CSV_COLUMNS` in [`src/costs/analyze.py`](src/costs/analyze.py); `_WORKSPACES`, `_JOBS`, `_AUDIT`, `_METRICS` in [`src/costs/ops.py`](src/costs/ops.py).
 
 These containers belong to a Python process. Inspect which are constant fixtures and which are mutated. Mutable process state needs an explicit shared-storage or synchronization strategy before multiple workers can provide consistent behavior.
 
@@ -149,3 +156,9 @@ The implementation in [`src/costs/analyze.py`](src/costs/analyze.py#L57) branche
 - `row['cost'] < 0`
 
 A useful extension is a table-driven test that covers each condition just below, at, and above its boundary where applicable. These expressions are the current rules; changing them changes behavior and should be justified by the project’s acceptance criteria.
+
+## 14. What does the operations plane add, and where is its limit?
+
+[`src/costs/ops.py`](src/costs/ops.py) declares `GET /readyz`, `POST /workspaces`, `GET /workspaces`, `POST /workspaces/{workspace_id}/jobs`, `GET /jobs/{job_id}`, `POST /jobs/{job_id}/approve`, `GET /audit`, `GET /metrics`. Inspect the application’s `include_router` call for its URL prefix.
+
+Its state containers are `_WORKSPACES`, `_JOBS`, `_AUDIT`, `_METRICS`. The job-approval handler defines whether a target is accepted or refused; check that branch and the associated tests instead of treating a recorded job as a successful infrastructure apply.
