@@ -96,11 +96,11 @@ This is a concrete regression example from the repository. Its assertions establ
 - `GET /healthz` → `healthz` in [`src/costs/main.py`](src/costs/main.py#L38).
 - `POST /costs/summary` → `summary` in [`src/costs/main.py`](src/costs/main.py#L43).
 - `POST /costs/csv` → `summary_from_csv` in [`src/costs/main.py`](src/costs/main.py#L54).
-- `GET /readyz` → `readyz` in [`src/costs/ops.py`](src/costs/ops.py#L44).
-- `POST /workspaces` → `create_workspace` in [`src/costs/ops.py`](src/costs/ops.py#L49).
-- `GET /workspaces` → `list_workspaces` in [`src/costs/ops.py`](src/costs/ops.py#L66).
-- `POST /workspaces/{workspace_id}/jobs` → `create_job` in [`src/costs/ops.py`](src/costs/ops.py#L73).
-- `GET /jobs/{job_id}` → `get_job` in [`src/costs/ops.py`](src/costs/ops.py#L96).
+- `GET /readyz` → `readyz` in [`src/costs/ops.py`](src/costs/ops.py#L74).
+- `POST /workspaces` → `create_workspace` in [`src/costs/ops.py`](src/costs/ops.py#L80).
+- `GET /workspaces` → `list_workspaces` in [`src/costs/ops.py`](src/costs/ops.py#L98).
+- `POST /workspaces/{workspace_id}/jobs` → `create_job` in [`src/costs/ops.py`](src/costs/ops.py#L106).
+- `GET /jobs/{job_id}` → `get_job` in [`src/costs/ops.py`](src/costs/ops.py#L130).
 
 These are literal decorators. Application/router prefixes, authentication, and middleware must be checked in the corresponding setup code.
 
