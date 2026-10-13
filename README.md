@@ -1,5 +1,12 @@
 # Cloud cost analyzer
 
+## Overview
+
+A small API that summarizes a GCP billing export or an AWS Cost and Usage Report without a cloud login. It accepts JSON cost rows or a CSV, groups spend by service with each service's share, checks a budget, reports credits separately, and names any day that jumped 1.5 times or more over the day before. Unknown providers, rows missing fields, non-numeric costs and mixed currencies are refused rather than guessed.
+
+- **Built with:** Python, uvicorn, pytest, Docker, GitHub Actions
+- **Scope:** Beginner lab that reads a local sample export; it does not connect to a cloud account or convert currencies.
+
 <!-- project-guide:start -->
 ## Project guide
 
